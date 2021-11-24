@@ -1,10 +1,15 @@
-
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Grid } from '@mui/material'
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Grid,
+} from '@mui/material'
 import { useState } from 'react'
 
-
 const AddSessionDialog = ({ model }: any) => {
-
   const handleNameChange = ({ target: { value } }) => {
     model.setContext(value)
   }
@@ -12,13 +17,8 @@ const AddSessionDialog = ({ model }: any) => {
   return (
     <Dialog {...model.dialogProps}>
       <DialogTitle>Add Session</DialogTitle>
-      <DialogContent >
-        <Grid
-          container
-          direction="column"
-          justifyContent="center"
-          alignItems="center"
-        >
+      <DialogContent>
+        <Grid container direction="column" justifyContent="center" alignItems="center">
           <Grid item style={{ padding: '20px' }}>
             <TextField
               label="Name (e.g. Bench Press)"
@@ -31,8 +31,12 @@ const AddSessionDialog = ({ model }: any) => {
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button color="primary" onClick={model.onConfirm} autoFocus>Confirm</Button>
-        <Button onClick={model.hide} autoFocus>Close</Button>
+        <Button color="primary" onClick={model.onConfirm} autoFocus>
+          Confirm
+        </Button>
+        <Button onClick={model.hide} autoFocus>
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   )
@@ -40,15 +44,13 @@ const AddSessionDialog = ({ model }: any) => {
 
 export default AddSessionDialog
 
-
-
 export const useSessionsDialog = ({ onSubmit }) => {
   const [showSessionsDialog, setShowSessionsDialog] = useState(false)
   const [context, setContext] = useState('')
 
   return {
     dialogProps: {
-      open: showSessionsDialog
+      open: showSessionsDialog,
     },
     onConfirm: () => {
       onSubmit(context)
@@ -58,6 +60,6 @@ export const useSessionsDialog = ({ onSubmit }) => {
     hide: () => setShowSessionsDialog(false),
     setContext: (context: any) => setContext(context),
     context,
-    showSessionsDialog
+    showSessionsDialog,
   }
 }

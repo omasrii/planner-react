@@ -1,56 +1,64 @@
-
 import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid'
-import { makeStyles } from '@mui/styles';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Fade, Grid, Paper, Popper, TextField, Typography } from '@mui/material'
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Fade,
+  Grid,
+  Paper,
+  Popper,
+  TextField,
+  Typography,
+} from '@mui/material'
 import PopupState, { bindToggle, bindPopper } from 'material-ui-popup-state'
 import { useState } from 'react'
 import { humanDateString } from './utils'
 import axios from 'axios'
 
-
 const SetsDialog = ({ model }: any) => {
-  const classes = useStyles()
   const CustomToolbar = () => {
     return (
       <GridToolbarContainer style={{ display: 'flex', justifyContent: 'center' }}>
         <AddSetPopup model={model} />
       </GridToolbarContainer>
-    );
+    )
   }
 
   return (
     <Dialog {...model.dialogProps}>
-      <DialogTitle>[{model.context.id}] {model.context.name}
+      <DialogTitle>
+        [{model.context.id}] {model.context.name}
         <Typography color="textSecondary">{humanDateString(model.context.date)}</Typography>
       </DialogTitle>
-      <DialogContent >
+      <DialogContent>
         <Box width={'70vw'} padding={2} alignContent="center">
           <DataGrid
             components={{
-              Toolbar: CustomToolbar
+              Toolbar: CustomToolbar,
             }}
-            rows={model.context.sets?.map((s, i) => { return { ...s, id: i + 1 } }) || []}
+            rows={
+              model.context.sets?.map((s, i) => {
+                return { ...s, id: i + 1 }
+              }) || []
+            }
             columns={model.setsGridColumns}
             autoPageSize={true}
             autoHeight={true}
-            hideFooterPagination={true} />
+            hideFooterPagination={true}
+          />
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={model.hide} autoFocus>Close</Button>
+        <Button onClick={model.hide} autoFocus>
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   )
 }
-
-const useStyles = makeStyles({
-  dataGrid: {
-    borderRadius: 3,
-    border: 0,
-    boxShadow: "0 2px 5px 2px rgba(0,0,0, .3)",
-    width: "70vw"
-  }
-});
 
 export default SetsDialog
 
@@ -60,12 +68,12 @@ export const AddSetPopup = ({ model }: any) => {
 
   const handleAddSet = async (popupState) => {
     const { id: session_id } = model.context
-    let resp = await axios.post(`http://10.0.0.191:7000/sets/omar`, {
+    let resp = await axios.post(`${process.env.REACT_APP_PLANNER_API_URL}/sets/omar`, {
       set: {
         session_id,
         load,
-        reps
-      }
+        reps,
+      },
     })
     console.log(resp.data)
     popupState.close()
@@ -84,12 +92,7 @@ export const AddSetPopup = ({ model }: any) => {
             {({ TransitionProps }) => (
               <Fade {...TransitionProps} timeout={350}>
                 <Paper>
-                  <Grid
-                    container
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
+                  <Grid container direction="column" justifyContent="center" alignItems="center">
                     <Grid item style={{ padding: '20px' }}>
                       <TextField
                         label="load"
@@ -107,19 +110,22 @@ export const AddSetPopup = ({ model }: any) => {
                       />
                     </Grid>
                   </Grid>
-                  <div style={{ display: 'flex', flexDirection: "column" }}>
-                    <Button size="large" onClick={() => handleAddSet(popupState)}>Confirm</Button>
-                    <Button size="large" onClick={popupState.close}>Close</Button>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <Button size="large" onClick={() => handleAddSet(popupState)}>
+                      Confirm
+                    </Button>
+                    <Button size="large" onClick={popupState.close}>
+                      Close
+                    </Button>
                   </div>
                 </Paper>
               </Fade>
             )}
           </Popper>
         </div>
-      )
-      }
-    </PopupState >
-  );
+      )}
+    </PopupState>
+  )
 }
 
 export const useSetsDialog = ({ onConfirm }: any) => {
@@ -139,7 +145,7 @@ export const useSetsDialog = ({ onConfirm }: any) => {
 
   return {
     dialogProps: {
-      open: showSetsDialog
+      open: showSetsDialog,
     },
     show: () => setShowSetsDialog(true),
     hide: () => setShowSetsDialog(false),
@@ -147,7 +153,6 @@ export const useSetsDialog = ({ onConfirm }: any) => {
     setContext: (context: any) => setContext(context),
     context,
     showSetsDialog,
-    setsGridColumns
+    setsGridColumns,
   }
 }
-

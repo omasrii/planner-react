@@ -1,13 +1,12 @@
-import { Button, Card, CardContent, Grid, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import { DataGrid, GridColDef, GridRowParams, GridToolbarContainer } from '@mui/x-data-grid';
-import axios from 'axios';
-import { useCallback, useEffect, useReducer, useState } from 'react';
-import { Refresh } from "@mui/icons-material"
-import { MicrocycleInterface, SessionInterface } from '../../../interface';
-import AddSessionDialog, { useSessionsDialog } from './AddSession';
-import SetsDialog, { useSetsDialog } from './SetsDialog';
-import { humanDateString } from './utils';
+import { Button, Card, CardContent, Grid, Typography } from '@mui/material'
+import { makeStyles } from '@mui/styles'
+import { DataGrid, GridColDef, GridRowParams, GridToolbarContainer } from '@mui/x-data-grid'
+import axios from 'axios'
+import { useCallback, useEffect, useState } from 'react'
+import { MicrocycleInterface, SessionInterface } from '../../../interface'
+import AddSessionDialog, { useSessionsDialog } from './AddSession'
+import SetsDialog, { useSetsDialog } from './SetsDialog'
+import { humanDateString } from './utils'
 
 export interface MicrocycleProps extends MicrocycleInterface {
   hidden?: boolean
@@ -36,80 +35,76 @@ const Microcycle = (props: MicrocycleProps) => {
   const [sessions, setSessions] = useState([])
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [reload, setReload] = useState(false);
+  const [reload, setReload] = useState(false)
   const classes = useStyles()
 
   const setsDialogModel = useSetsDialog({
-    onConfirm: () => fetchSessions()
+    onConfirm: () => fetchSessions(),
   })
   const sessionsDialogModel = useSessionsDialog({
     onSubmit: async (name) => {
-      let resp = await axios.post(`http://10.0.0.191:7000/sessions/omar`, {
+      let resp = await axios.post(`${process.env.REACT_APP_PLANNER_API_URL}/sessions/omar`, {
         session: {
           name,
           phase_id,
           mesocycle_id,
-          microcycle_id: id
-        }
+          microcycle_id: id,
+        },
       })
       console.log(resp.data)
       console.log('Test')
       await fetchSessions()
       setReload(true)
       setReload(false)
-    }
+    },
   })
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     setLoading(true)
-    const resp = await axios.get(`http://10.0.0.191:7000/microcycles/${id}/sessions`)
+    const resp = await axios.get(
+      `${process.env.REACT_APP_PLANNER_API_URL}/microcycles/${id}/sessions`
+    )
     setSessions(resp.data)
     const { sessions: sessionsFormatted } = formatCycle({ sessions: resp.data, date, deload })
     setRows(sessionsFormatted)
     setLoading(false)
-  }
-
-  const addSession = () => {
-    sessionsDialogModel.show()
-  }
+  }, [date, deload, id])
 
   useEffect(() => {
     fetchSessions()
-  }, [])
+  }, [fetchSessions])
 
   const handleRowClick = (params: GridRowParams) => {
     setsDialogModel.show()
-    const session: any = sessions.find((s: SessionInterface) => params.row.session_id === s.id) || {}
+    const session: any =
+      sessions.find((s: SessionInterface) => params.row.session_id === s.id) || {}
     setsDialogModel.setContext(session)
   }
 
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
-        <Button color="primary" onClick={addSession}>Add Session</Button>
+        <Button color="primary" onClick={() => sessionsDialogModel.show()}>
+          Add Session
+        </Button>
       </GridToolbarContainer>
-    );
+    )
   }
 
   return (
     <>
       <Card sx={{ mb: 2 }}>
         <CardContent>
-
           <Typography gutterBottom variant="h6" component="div">
-            {new Date(date).toDateString()}{deload && '*'}
+            {new Date(date).toDateString()}
+            {deload && '*'}
           </Typography>
-          <Grid
-            container
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-          >
+          <Grid container direction="row" justifyContent="center" alignItems="center">
             <Grid item>
-              {!reload ?
+              {!reload ? (
                 <DataGrid
                   components={{
-                    Toolbar: CustomToolbar
+                    Toolbar: CustomToolbar,
                   }}
                   onCellClick={(_, e) => e.preventDefault()}
                   onRowClick={handleRowClick}
@@ -121,11 +116,10 @@ const Microcycle = (props: MicrocycleProps) => {
                   autoHeight={true}
                   hideFooterPagination={true}
                   loading={loading}
-                  className={classes.dataGrid} />
-                : null}
-
+                  className={classes.dataGrid}
+                />
+              ) : null}
             </Grid>
-
           </Grid>
         </CardContent>
       </Card>
@@ -133,44 +127,43 @@ const Microcycle = (props: MicrocycleProps) => {
       <AddSessionDialog model={sessionsDialogModel} />
       <SetsDialog model={setsDialogModel} />
     </>
-
   )
 }
 
-export default Microcycle;
+export default Microcycle
 
 const useStyles = makeStyles({
   dataGrid: {
     borderRadius: 3,
     border: 0,
-    boxShadow: "0 2px 5px 2px rgba(0,0,0, .3)",
-    width: "92vw"
-  }
-});
+    boxShadow: '0 2px 5px 2px rgba(0,0,0, .3)',
+    width: '92vw',
+  },
+})
 
 const formatCycle = (cycle: MicrocycleProps) => {
   const { sessions, date, deload } = cycle
 
   const currentCycleSessions: any = []
 
-  sessions?.forEach(session => {
+  sessions?.forEach((session) => {
     const { id: session_id, sets, date, name } = session
 
-    const loads = Array.from(new Set(sets.map(set => set.load)))
+    const loads = Array.from(new Set(sets.map((set) => set.load)))
 
     if (loads.length) {
-      loads.map((load, i) => {
-        const load_reps = sets.filter(set => set.load === load).map(set => set.reps)
+      loads.forEach((load, i) => {
+        const load_reps = sets.filter((set) => set.load === load).map((set) => set.reps)
         currentCycleSessions.push({
           id: name + i + date,
           date: humanDateString(date),
           session_id,
           name,
           load,
-          sets: sets.filter(set => set.load === load).length,
+          sets: sets.filter((set) => set.load === load).length,
           rep_max: Math.max(...load_reps),
           rep_min: Math.min(...load_reps),
-          rep_avg: Math.round(load_reps.reduce((acc, reps) => acc += reps, 0) / load_reps.length)
+          rep_avg: Math.round(load_reps.reduce((acc, reps) => (acc += reps), 0) / load_reps.length),
         })
       })
     } else {
@@ -181,18 +174,16 @@ const formatCycle = (cycle: MicrocycleProps) => {
         name,
       })
     }
-
-
   })
 
   console.log({
     date: date,
     deload: !!deload,
-    sessions: currentCycleSessions
+    sessions: currentCycleSessions,
   })
   return {
     date: date,
     deload: !!deload,
-    sessions: currentCycleSessions
+    sessions: currentCycleSessions,
   }
 }

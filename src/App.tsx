@@ -1,60 +1,60 @@
-import styled from '@emotion/styled';
-import { Button } from '@mui/material';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import Header from './components/header';
-import Mesocycle from './components/mesocycle';
-import { MesocycleInterface } from './interface';
-// import { mesocycles } from './data';
+import styled from '@emotion/styled'
+import { Button } from '@mui/material'
+import { useDispatch, useSelector } from 'react-redux'
+import AppHeader from './components/AppHeader'
+import ApplicationErrorBanner from './components/ApplicationErrorBanner'
+import EmptyState from './components/EmptyState'
+import Mesocycle from './components/mesocycle'
+import Phase from './components/phase'
+import { RootState } from './store'
+import { createMesocycle } from './store/effects/application'
+import { ApplicationState } from './store/types'
 
 const App = () => {
-  const [mesocycles, setMesocycles] = useState([])
-
-  const fetchMesos = async () => {
-    let resp = await axios.get('http://10.0.0.191:7000/mesocycles/omar')
-    console.log(resp)
-    setMesocycles(resp.data)
-  }
-
-  useEffect(() => {
-    // console.log(mesocycles)
-    fetchMesos()
-  }, [])
+  const { user, mesocycles, phases, selectedPhase } = useSelector<RootState, ApplicationState>(
+    (state) => state.application
+  )
+  const dispatch = useDispatch()
 
   return (
     <>
-      <Header />
-      <MesocycleContainer>
-        <AddMesoContainer>
-          <Button color="primary" variant="outlined" size="large">Add Mesocycle</Button>
-        </AddMesoContainer>
-        {
-          mesocycles
-            ?.sort((a: MesocycleInterface, b: MesocycleInterface) => new Date(a.date) < new Date(b.date) ? 1 : -1)
-            .map(mesocycle => {
+      <AppHeader />
+      <ApplicationErrorBanner />
+      {user.name && selectedPhase && (
+        <Phase phase={selectedPhase}>
+          <MesocycleContainer>
+            <AddMesocycleContainer>
+              <Button
+                color="primary"
+                variant="outlined"
+                size="large"
+                onClick={() => dispatch(createMesocycle())}
+              >
+                Add Mesocycle
+              </Button>
+            </AddMesocycleContainer>
+            {mesocycles.map((mesocycle) => {
               const { date } = mesocycle
-              return (
-                <Mesocycle key={date} {...mesocycle} />
-              )
-            })
-        }
-      </MesocycleContainer>
+              return <Mesocycle key={date} {...mesocycle} />
+            })}
+          </MesocycleContainer>
+        </Phase>
+      )}
+      {!phases.length && user.name && <EmptyState />}
     </>
   )
 }
 
-export default App;
+export default App
 
 const MesocycleContainer = styled.div({
   display: 'flex',
   flexDirection: 'column',
-  // rowGap: '5px'
 })
 
-
-const AddMesoContainer = styled.div({
+const AddMesocycleContainer = styled.div({
   display: 'flex',
   flexDirection: 'column',
   marginTop: '5px',
-  marginBottom: '15px'
+  marginBottom: '15px',
 })

@@ -1,27 +1,24 @@
 /* internal components */
-import Microcycle from '../../microcycle/lib/Microcycle';
+import Microcycle from '../../microcycle/lib/Microcycle'
 import MesocycleAccordion from './MesocycleAccordion'
-import { MicrocycleProps } from '../../microcycle';
-import { useEffect, useState } from 'react';
-import { MesocycleInterface } from '../../../interface';
-import axios from 'axios';
+import { MicrocycleProps } from '../../microcycle'
+import { useState } from 'react'
+import { MesocycleInterface } from '../../../interface'
+import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../store'
+import { ApplicationState } from '../../../store/types'
 
 const Mesocycle = (props: MesocycleInterface) => {
   const { microcycles, id: mesocycle_id, phase_id } = props
-  const hiddenValues = microcycles.map((c: any) => !!c.hidden)
-  const [hideCycle, setHideCycle] = useState<any>(hiddenValues)
-  const [expanded, setExpanded] = useState(false);
+  const { user } = useSelector<RootState, ApplicationState>((state) => state.application)
+  const [expanded, setExpanded] = useState(false)
   const [currentMicrocycles, setMicrocycles] = useState(microcycles)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    console.log('meso state change')
-  }, [hideCycle])
 
   const handleCollapse = () => {
     setExpanded(!expanded)
   }
-
 
   const handleAddMicrocycle = async (deload: boolean = false) => {
     setLoading(true)
@@ -30,13 +27,16 @@ const Mesocycle = (props: MesocycleInterface) => {
       microcycle: {
         mesocycle_id,
         phase_id,
-        deload
-      }
+        deload,
+      },
     }
 
-    const resp = await axios.post('http://10.0.0.191:7000/microcycles/omar', body)
+    const resp = await axios.post(
+      `${process.env.REACT_APP_PLANNER_API_URL}/microcycles/${user.name}`,
+      body
+    )
     console.log(resp.data)
-    setMicrocycles(microcycles => {
+    setMicrocycles((microcycles) => {
       const copy = microcycles
       copy.push(resp.data)
       return copy
@@ -50,18 +50,15 @@ const Mesocycle = (props: MesocycleInterface) => {
       handleCollapse={handleCollapse}
       expanded={expanded}
       mesocycleProps={{ ...props }}
-      handleAddMicrocycle={handleAddMicrocycle}>
-      {
-        expanded && !loading ?
-          currentMicrocycles
-            .sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
-            .map((cycle: MicrocycleProps, index) => {
-              return <Microcycle key={index} {...cycle} handleAddMicrocycle={handleAddMicrocycle} />
-            })
-          : undefined
-      }
+      handleAddMicrocycle={handleAddMicrocycle}
+    >
+      {expanded && !loading
+        ? currentMicrocycles?.map((cycle: MicrocycleProps, index) => {
+            return <Microcycle key={index} {...cycle} handleAddMicrocycle={handleAddMicrocycle} />
+          })
+        : undefined}
     </MesocycleAccordion>
   )
 }
 
-export default Mesocycle;
+export default Mesocycle
