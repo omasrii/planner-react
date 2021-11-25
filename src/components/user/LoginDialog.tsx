@@ -36,6 +36,8 @@ const LoginDialog = () => {
   useEffect(() => {
     if (!loggedIn && !error) {
       model.show()
+    } else {
+      model.hide()
     }
   }, [loggedIn, error, model])
 
