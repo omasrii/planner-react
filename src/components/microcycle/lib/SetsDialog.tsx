@@ -116,7 +116,11 @@ export const AddSetPopup = ({ model }: any) => {
                     </Grid>
                   </Grid>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Button size="large" onClick={() => handleAddSet(popupState)}>
+                    <Button
+                      size="large"
+                      onClick={() => handleAddSet(popupState)}
+                      disabled={!reps || !load}
+                    >
                       Confirm
                     </Button>
                     <Button size="large" onClick={popupState.close}>

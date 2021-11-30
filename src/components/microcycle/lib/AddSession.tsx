@@ -25,13 +25,14 @@ const AddSessionDialog = ({ model }: any) => {
               value={model.context}
               variant="standard"
               required
+              autoFocus
               onChange={handleNameChange}
             />
           </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button color="primary" onClick={model.onConfirm} autoFocus>
+        <Button color="primary" onClick={model.onConfirm} disabled={!model.context}>
           Confirm
         </Button>
         <Button onClick={model.hide} autoFocus>
