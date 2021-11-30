@@ -100,6 +100,7 @@ export const AddSetPopup = ({ model }: any) => {
                         required
                         placeholder="load (unitless)"
                         type="number"
+                        autoFocus
                         onChange={({ target: { value } }) => setLoad(Number(value))}
                       />
                     </Grid>
