@@ -96,15 +96,19 @@ export const AddSetPopup = ({ model }: any) => {
                     <Grid item style={{ padding: '20px' }}>
                       <TextField
                         label="load"
-                        value={load}
+                        value={load ? load : undefined}
                         required
+                        placeholder="load (unitless)"
+                        type="number"
                         onChange={({ target: { value } }) => setLoad(Number(value))}
                       />
                     </Grid>
                     <Grid item>
                       <TextField
                         label="reps"
-                        value={reps}
+                        placeholder="# of reps"
+                        value={reps ? reps : undefined}
+                        type="number"
                         required
                         onChange={({ target: { value } }) => setReps(Number(value))}
                       />
