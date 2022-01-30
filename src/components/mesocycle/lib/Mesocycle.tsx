@@ -36,11 +36,7 @@ const Mesocycle = (props: MesocycleInterface) => {
       body
     )
     console.log(resp.data)
-    setMicrocycles((microcycles) => {
-      const copy = microcycles
-      copy.push(resp.data)
-      return copy
-    })
+    setMicrocycles([resp.data, ...microcycles])
 
     setLoading(false)
   }
