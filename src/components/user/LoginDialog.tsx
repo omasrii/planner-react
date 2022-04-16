@@ -7,6 +7,7 @@ import {
   Grid,
   MenuItem,
   TextField,
+  Checkbox,
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
@@ -39,7 +40,7 @@ const LoginDialog = () => {
     } else {
       model.hide()
     }
-  }, [loggedIn, error, model])
+  }, [loggedIn, error])
 
   return (
     <>
@@ -79,6 +80,18 @@ const LoginDialog = () => {
               />
             </Grid>
           </Grid>
+          <label>
+            <Checkbox
+              onChange={(e) => {
+                if (e.target.checked) {
+                  localStorage.setItem('user', userInput)
+                } else {
+                  localStorage.removeItem('user')
+                }
+              }}
+            />
+            Stay logged in
+          </label>
         </DialogContent>
         <DialogActions>
           <Button color="primary" disabled={!userInput} onClick={model.onConfirm}>
