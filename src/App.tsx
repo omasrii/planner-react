@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 import { Button } from '@mui/material'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import AppHeader from './components/AppHeader'
 import ApplicationErrorBanner from './components/ApplicationErrorBanner'
@@ -7,7 +8,7 @@ import EmptyState from './components/EmptyState'
 import Mesocycle from './components/mesocycle'
 import Phase from './components/phase'
 import { RootState } from './store'
-import { createMesocycle } from './store/effects/application'
+import { createMesocycle, loadUser } from './store/effects/application'
 import { ApplicationState } from './store/types'
 
 const App = () => {
@@ -15,6 +16,13 @@ const App = () => {
     (state) => state.application
   )
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    let savedUser = localStorage.getItem('user')
+    if (savedUser) {
+      dispatch(loadUser(savedUser))
+    }
+  }, [])
 
   return (
     <>
