@@ -56,6 +56,7 @@ const App = () => {
 export default App
 
 const MesocycleContainer = styled.div({
+  marginTop: '64px',
   display: 'flex',
   flexDirection: 'column',
 })
