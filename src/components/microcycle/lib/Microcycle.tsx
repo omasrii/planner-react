@@ -3,7 +3,10 @@ import { makeStyles } from '@mui/styles'
 import { DataGrid, GridColDef, GridRowParams, GridToolbarContainer } from '@mui/x-data-grid'
 import axios from 'axios'
 import { useCallback, useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { MicrocycleInterface, SessionInterface } from '../../../interface'
+import { RootState } from '../../../store'
+import { ApplicationState } from '../../../store/types'
 import AddSessionDialog, { useSessionsDialog } from './AddSession'
 import SetsDialog, { useSetsDialog } from './SetsDialog'
 import { humanDateString } from './utils'
@@ -16,7 +19,6 @@ export interface MicrocycleProps extends MicrocycleInterface {
 const commonProps: any = {
   disableColumnMenu: true,
   sortable: false,
-  // align: 'center'
 }
 
 const columns: GridColDef[] = [
@@ -32,6 +34,7 @@ const columns: GridColDef[] = [
 
 const Microcycle = (props: MicrocycleProps) => {
   const { id, date, deload, phase_id, mesocycle_id } = props
+  const { user } = useSelector<RootState, ApplicationState>((state) => state.application)
   const [sessions, setSessions] = useState([])
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -43,14 +46,17 @@ const Microcycle = (props: MicrocycleProps) => {
   })
   const sessionsDialogModel = useSessionsDialog({
     onSubmit: async (name) => {
-      let resp = await axios.post(`${process.env.REACT_APP_PLANNER_API_URL}/sessions/omar`, {
-        session: {
-          name,
-          phase_id,
-          mesocycle_id,
-          microcycle_id: id,
-        },
-      })
+      let resp = await axios.post(
+        `${process.env.REACT_APP_PLANNER_API_URL}/sessions/${user.name}`,
+        {
+          session: {
+            name,
+            phase_id,
+            mesocycle_id,
+            microcycle_id: id,
+          },
+        }
+      )
       console.log(resp.data)
       console.log('Test')
       await fetchSessions()

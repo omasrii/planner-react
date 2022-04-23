@@ -17,6 +17,9 @@ import PopupState, { bindToggle, bindPopper } from 'material-ui-popup-state'
 import { useState } from 'react'
 import { humanDateString } from './utils'
 import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../store'
+import { ApplicationState } from '../../../store/types'
 
 const SetsDialog = ({ model }: any) => {
   const CustomToolbar = () => {
@@ -63,12 +66,13 @@ const SetsDialog = ({ model }: any) => {
 export default SetsDialog
 
 export const AddSetPopup = ({ model }: any) => {
+  const { user } = useSelector<RootState, ApplicationState>((state) => state.application)
   const [load, setLoad] = useState(0)
   const [reps, setReps] = useState(0)
 
   const handleAddSet = async (popupState) => {
     const { id: session_id } = model.context
-    let resp = await axios.post(`${process.env.REACT_APP_PLANNER_API_URL}/sets/omar`, {
+    let resp = await axios.post(`${process.env.REACT_APP_PLANNER_API_URL}/sets/${user.name}`, {
       set: {
         session_id,
         load,
