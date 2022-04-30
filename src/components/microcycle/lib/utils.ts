@@ -1,1 +1,1 @@
-export const humanDateString = (date: string) => new Date(date).toDateString()
+export const humanDateString = (date: any) => new Date(date).toDateString()

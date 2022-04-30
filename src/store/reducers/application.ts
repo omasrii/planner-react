@@ -5,6 +5,7 @@ const initialState: ApplicationState = {
   loggedIn: false,
   loading: false,
   user: {
+    id: 0,
     name: '',
     weight: 0,
   },

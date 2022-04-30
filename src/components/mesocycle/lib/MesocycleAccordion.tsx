@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { makeStyles, createStyles } from '@mui/styles'
 import Accordion from '@mui/material/Accordion'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import AccordionSummary from '@mui/material/AccordionSummary'
@@ -8,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import { DefaultTheme } from '@mui/styles'
 import { Button, Checkbox, FormControlLabel, Grid, Popover } from '@mui/material'
 import styled from '@emotion/styled'
+import { makeStyles, createStyles } from '@mui/styles'
 import { MesocycleInterface } from '../../../interface'
 
 const useStyles = makeStyles((theme: DefaultTheme) =>

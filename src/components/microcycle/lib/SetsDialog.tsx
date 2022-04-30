@@ -1,4 +1,3 @@
-import { DataGrid, GridToolbarContainer } from '@mui/x-data-grid'
 import {
   Box,
   Button,
@@ -9,19 +8,21 @@ import {
   Fade,
   Grid,
   Paper,
-  Popper,
   TextField,
   Typography,
 } from '@mui/material'
-import PopupState, { bindToggle, bindPopper } from 'material-ui-popup-state'
+import Popper from '@mui/material/Popper'
+import { DataGrid, GridColDef, GridToolbarContainer } from '@mui/x-data-grid'
 import { useState } from 'react'
-import { humanDateString } from './utils'
-import axios from 'axios'
 import { useSelector } from 'react-redux'
+import { plannerService } from '../../../services/plannerService'
 import { RootState } from '../../../store'
 import { ApplicationState } from '../../../store/types'
+import { humanDateString } from './utils'
 
 const SetsDialog = ({ model }: any) => {
+  const { sets } = model.context
+
   const CustomToolbar = () => {
     return (
       <GridToolbarContainer style={{ display: 'flex', justifyContent: 'center' }}>
@@ -31,25 +32,30 @@ const SetsDialog = ({ model }: any) => {
   }
 
   return (
-    <Dialog {...model.dialogProps}>
+    <Dialog {...model.dialogProps} fullWidth>
       <DialogTitle>
         [{model.context.id}] {model.context.name}
         <Typography color="textSecondary">{humanDateString(model.context.date)}</Typography>
       </DialogTitle>
       <DialogContent>
-        <Box width={'70vw'} padding={2} alignContent="center">
+        <Box padding={2} alignContent="center">
           <DataGrid
             components={{
               Toolbar: CustomToolbar,
             }}
-            rows={
-              model.context.sets?.map((s, i) => {
-                return { ...s, id: i + 1 }
-              }) || []
-            }
+            rows={sets?.map((set, i) => ({ ...set, id: i + 1, set_id: set.id })) || []}
+            onCellEditStop={async ({ field, row }: any, e: any) => {
+              const body = {}
+              body[field] = e.target.value
+              const resp = await plannerService.putSet(row.set_id, body)
+              model.onConfirm()
+            }}
             columns={model.setsGridColumns}
+            headerHeight={40}
+            rowHeight={40}
             autoPageSize={true}
             autoHeight={true}
+            pageSize={50}
             hideFooterPagination={true}
           />
         </Box>
@@ -70,74 +76,79 @@ export const AddSetPopup = ({ model }: any) => {
   const [load, setLoad] = useState(0)
   const [reps, setReps] = useState(0)
 
-  const handleAddSet = async (popupState) => {
+  const [open, setOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+
+  const handleAddSet = async () => {
     const { id: session_id } = model.context
-    let resp = await axios.post(`${process.env.REACT_APP_PLANNER_API_URL}/sets/${user.name}`, {
-      set: {
-        session_id,
-        load,
-        reps,
-      },
+
+    const resp = await plannerService.postSet(user.name, {
+      session_id,
+      load,
+      reps,
     })
-    console.log(resp.data)
-    popupState.close()
+
+    setOpen(false)
     model.onConfirm()
     model.hide()
   }
 
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+    setOpen(!open)
+  }
+
   return (
-    <PopupState variant="popper" popupId="demo-popup-popper">
-      {(popupState) => (
-        <div>
-          <Button color="primary" {...bindToggle(popupState)}>
-            Add Set
-          </Button>
-          <Popper {...bindPopper(popupState)} transition style={{ zIndex: 9999 }}>
-            {({ TransitionProps }) => (
-              <Fade {...TransitionProps} timeout={350}>
-                <Paper>
-                  <Grid container direction="column" justifyContent="center" alignItems="center">
-                    <Grid item style={{ padding: '20px' }}>
-                      <TextField
-                        label="load"
-                        value={load ? load : undefined}
-                        required
-                        placeholder="load (unitless)"
-                        type="number"
-                        autoFocus
-                        onChange={({ target: { value } }) => setLoad(Number(value))}
-                      />
-                    </Grid>
-                    <Grid item>
-                      <TextField
-                        label="reps"
-                        placeholder="# of reps"
-                        value={reps ? reps : undefined}
-                        type="number"
-                        required
-                        onChange={({ target: { value } }) => setReps(Number(value))}
-                      />
-                    </Grid>
-                  </Grid>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <Button
-                      size="large"
-                      onClick={() => handleAddSet(popupState)}
-                      disabled={!reps || !load}
-                    >
-                      Confirm
-                    </Button>
-                    <Button size="large" onClick={popupState.close}>
-                      Close
-                    </Button>
-                  </div>
-                </Paper>
-              </Fade>
-            )}
-          </Popper>
-        </div>
-      )}
-    </PopupState>
+    <div>
+      <Button color="primary" onClick={handleClick}>
+        Add Set
+      </Button>
+      <Popper
+        open={open}
+        anchorEl={anchorEl}
+        placement="bottom"
+        transition
+        style={{ zIndex: 9999 }}
+      >
+        {({ TransitionProps }) => (
+          <Fade {...TransitionProps} timeout={350}>
+            <Paper>
+              <Grid container direction="column" justifyContent="center" alignItems="center">
+                <Grid item style={{ padding: '20px' }}>
+                  <TextField
+                    label="load"
+                    value={load ? load : undefined}
+                    required
+                    placeholder="load (unitless)"
+                    type="number"
+                    autoFocus
+                    onChange={({ target: { value } }) => setLoad(Number(value))}
+                  />
+                </Grid>
+                <Grid item>
+                  <TextField
+                    label="reps"
+                    placeholder="# of reps"
+                    value={reps ? reps : undefined}
+                    type="number"
+                    required
+                    onChange={({ target: { value } }) => setReps(Number(value))}
+                  />
+                </Grid>
+              </Grid>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <Button size="large" onClick={() => handleAddSet()} disabled={!reps || !load}>
+                  Confirm
+                </Button>
+                <Button size="large" onClick={() => setOpen(false)}>
+                  Close
+                </Button>
+              </div>
+            </Paper>
+          </Fade>
+        )}
+      </Popper>
+    </div>
   )
 }
 
@@ -148,12 +159,14 @@ export const useSetsDialog = ({ onConfirm }: any) => {
   const commonProps: any = {
     disableColumnMenu: true,
     sortable: false,
-    // align: 'center'
+    align: 'center',
+    headerAlign: 'center',
   }
-  const setsGridColumns = [
-    { field: 'id', headerName: 'Set', type: 'number', minWidth: 60, ...commonProps },
-    { field: 'load', headerName: 'Load', type: 'number', minWidth: 64, ...commonProps },
-    { field: 'reps', headerName: 'Reps', type: 'number', minWidth: 64, ...commonProps },
+  const setsGridColumns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', type: 'number', ...commonProps },
+    { field: 'set_id', headerName: 'Set', type: 'number', hide: true, ...commonProps },
+    { field: 'load', headerName: 'Load', type: 'number', editable: true, ...commonProps },
+    { field: 'reps', headerName: 'Reps', type: 'number', editable: true, ...commonProps },
   ]
 
   return {

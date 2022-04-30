@@ -4,7 +4,7 @@
  *
  */
 interface RowInterface {
-  id?: number
+  id: number
 }
 
 export interface SetInterface extends RowInterface {
@@ -31,11 +31,10 @@ export interface SessionInterface extends RowInterface {
  */
 export interface MicrocycleInterface extends RowInterface {
   date: string
+  phase_id: number
+  mesocycle_id: number
   deload?: boolean
   sessions?: SessionInterface[]
-
-  phase_id?: number
-  mesocycle_id?: number
 }
 
 /**

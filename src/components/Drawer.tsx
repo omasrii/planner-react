@@ -1,4 +1,3 @@
-import { Typography } from '@material-ui/core'
 import MenuIcon from '@mui/icons-material/Menu'
 import NoteIcon from '@mui/icons-material/Note'
 import {
@@ -10,6 +9,7 @@ import {
   ListItemIcon,
   ListItemText,
   SwipeableDrawer,
+  Typography,
 } from '@mui/material'
 import * as React from 'react'
 import { useState } from 'react'

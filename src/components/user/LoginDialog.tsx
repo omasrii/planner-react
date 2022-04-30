@@ -29,6 +29,8 @@ const LoginDialog = () => {
 
   const handleNameInputChange = ({ target: { value } }) => setUserInput(value)
   const handleSwitchUser = () => {
+    localStorage.removeItem('user')
+
     dispatch(resetApplicationState())
     setUserInput('')
     model.show()

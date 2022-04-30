@@ -1,14 +1,17 @@
-import React from 'react'
+import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import App from './App'
+import './index.css'
 import reportWebVitals from './reportWebVitals'
 import store from './store'
-import './index.css'
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <LocalizationProvider dateAdapter={AdapterMoment}>
+      <App />
+    </LocalizationProvider>
   </Provider>,
   document.getElementById('root')
 )

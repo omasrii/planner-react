@@ -1,13 +1,13 @@
 /* internal components */
-import Microcycle from '../../microcycle/lib/Microcycle'
-import MesocycleAccordion from './MesocycleAccordion'
-import { MicrocycleProps } from '../../microcycle'
 import { useState } from 'react'
-import { MesocycleInterface } from '../../../interface'
-import axios from 'axios'
 import { useSelector } from 'react-redux'
+import { MesocycleInterface } from '../../../interface'
+import { plannerService } from '../../../services/plannerService'
 import { RootState } from '../../../store'
 import { ApplicationState } from '../../../store/types'
+import { MicrocycleProps } from '../../microcycle'
+import Microcycle from '../../microcycle/lib/Microcycle'
+import MesocycleAccordion from './MesocycleAccordion'
 
 const Mesocycle = (props: MesocycleInterface) => {
   const { microcycles, id: mesocycle_id, phase_id } = props
@@ -23,18 +23,11 @@ const Mesocycle = (props: MesocycleInterface) => {
   const handleAddMicrocycle = async (deload: boolean = false) => {
     setLoading(true)
 
-    const body = {
-      microcycle: {
-        mesocycle_id,
-        phase_id,
-        deload,
-      },
-    }
-
-    const resp = await axios.post(
-      `${process.env.REACT_APP_PLANNER_API_URL}/microcycles/${user.name}`,
-      body
-    )
+    const resp = await plannerService.postMicrocycle(user.name, {
+      mesocycle_id,
+      phase_id,
+      deload,
+    })
     console.log(resp.data)
     setMicrocycles([resp.data, ...microcycles])
 
